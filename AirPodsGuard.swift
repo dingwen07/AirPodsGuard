@@ -127,18 +127,20 @@ func processAirPods(from input: [String: Any]) -> Bool {
     
     var doUpdate = false
 
-    if currentDate.timeIntervalSince(lastUpdateDate) > warningThreshold {
+    let sinceLastUpdate = currentDate.timeIntervalSince(lastUpdateDate)
+
+    if sinceLastUpdate > warningThreshold {
         doUpdate = true
     }
 
-    if isCharging != lastUpdateCharging {
+    if isCharging != lastUpdateCharging && sinceLastUpdate > warningThreshold * 0.5 {
         doUpdate = true
     }
 
     // if lastUpdateDate is older than 5 minutes
     if !isCharging && otherPartUpdateCharging {
         print("[\(currentDate)] One AirPod is not charging: \(name) - \(partIdentifier)")
-        if currentDate.timeIntervalSince(lastUpdateDate) > warningThreshold && currentDate.timeIntervalSince(lastLearnedDate) < warningThreshold {
+        if sinceLastUpdate > warningThreshold && currentDate.timeIntervalSince(lastLearnedDate) < warningThreshold {
             print("[\(currentDate)] Dispatching callback")
             oneAirPodIsNotCharging(name: name, part: partIdentifier)
         }
@@ -258,6 +260,5 @@ signal(SIGINT) { _ in
 }
 
 // Keep the main thread alive
-// RunLoop.main.run()
-// readline until EOF
-while let _ = readLine() {}
+RunLoop.main.run()
+// while let _ = readLine() {}
